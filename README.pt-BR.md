@@ -1,7 +1,7 @@
-# BR [Versão em Português](README.pt-BR.md)
+# 🇺🇸 [English version](README.md)
 # Event Horizon
 
-Event Horizon é uma ferramenta modular de linha de comando designada para operações de rede controladas, enumeração, e teste de conectividade
+Event Horizon é uma ferramenta modular de linha de comando voltada para operações de rede controladas, enumeração e testes de conectividade.
 
 A ferramenta prioriza precisão, controle, e baixo impacto operacional em relação à velocidade bruta ou à execução em alto volume.
 
@@ -16,7 +16,7 @@ Event Horizon foi construído em torno de um princípio simples.
 Em vez de realizar operações agressivas e ruidosas, a ferramenta se concentra em:
 
 * Execução Controlada
-* Comportamento previsivel
+* Comportamento previsível
 * Baixo footprint operacional
 * Design Modular
 * Workflows de CLI confiáveis
@@ -27,7 +27,7 @@ Ele foi projetado para funcionar como um "canivete suíço" confiável para tare
 
 ## Objetivos do Projeto
 
-* Arquitetura Modular (`modulo -> ação`)
+* Arquitetura Modular (`módulo -> ação`)
 * Estrutura de comando clara e explicita
 * Controle preciso da execução (tempos limite, novas tentativas, taxa)
 * Saída consistente e previsível
@@ -39,14 +39,14 @@ Ele foi projetado para funcionar como um "canivete suíço" confiável para tare
 
 ### Subdomain
 
-* Descoberta de subdominio por bruteforce
+* Descoberta de subdomínio por bruteforce
 * Resolução de DNS
 
 ### SMB
 
 * Gerenciamento controlado de conexões
 * Tentativas de autenticação (usuário/senha)
-* Ataques de força bruta contra senhas (com taxa controlada)
+* Tentativas de autenticação controladas (força bruta e password spraying)
 
 ### Core
 
@@ -90,7 +90,7 @@ Em vez disso, ele se concentra em:
 
 ## Status
 
-Este projeto encontra-se atualmente em fase inicial de desenvolvimento.
+🚧 Este projeto encontra-se atualmente em fase inicial de desenvolvimento.
 
 A arquitetura principal e a estrutura da interface de linha de comando (CLI) estão sendo definidas antes da implementação completa.
 

@@ -1,4 +1,4 @@
-# US [English Version](README.md)
+# 🇧🇷 [Versão em Português](README.pt-BR.md)
 # Event Horizon
 
 Event Horizon is a modular command-line tool designed for controlled network operations, enumeration, and connectivity testing.
