@@ -1,6 +1,8 @@
+from core.validator import validate_smb_connect_args
 import argparse
 
 def run(args: argparse.Namespace) -> None:
+    validate_smb_connect_args(args)
     print("[smb:connect]")
     print(f"target    = {args.target}")
     print(f"user      = {args.user}")
@@ -30,5 +32,9 @@ def register(subparser: argparse._SubParsersAction) -> None:
         "-v", "--verbose",
         action="store_true",
         help="Enable verbose output."
+    )
+    parser.add_argument(
+        "-a", "--anonymous",
+        help="Use anonymous SMB authentication"
     )
     parser.set_defaults(func=run)

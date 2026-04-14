@@ -5,7 +5,6 @@ from modules.subdomain import resolve as subdomain_resolve
 from modules.smb import connect as smb_connect
 from modules.smb import spray as smb_spray
 
-
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="eventhorizon",
