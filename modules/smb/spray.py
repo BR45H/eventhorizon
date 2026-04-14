@@ -7,7 +7,6 @@ def run(args: argparse.Namespace) -> None:
     print(f"password_wordlist = {args.passwords}")
     print(f"verbose           = {args.verbose}")
 
-
 def register(subparsers: argparse._SubParsersAction) -> None:
     parser = subparsers.add_parser(
         "spray",

@@ -1,9 +1,8 @@
-import argparse
-
 from modules.subdomain import bruteforce as subdomain_bruteforce
 from modules.subdomain import resolve as subdomain_resolve
 from modules.smb import connect as smb_connect
 from modules.smb import spray as smb_spray
+import argparse
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(

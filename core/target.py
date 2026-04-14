@@ -102,6 +102,26 @@ def classify_target(target: str) -> str:
     raise TargetError(f"Unsupported target format: {target}")
 
 def load_targets_from_file(file_path: str) -> list[str]:
+    """
+    Load and sanitize targets from a file.
+
+    Reads the file content, splits it into lines, strips whitespace,
+    and filters out empty lines.
+
+    Args:
+        file_path (str): Path to the target file.
+
+    Returns:
+        list[str]: List of cleaned target strings.
+
+    Raises:
+        FileInputError:
+            - if the file does not exist
+            - if the path is not a file
+            - if the file cannot be read
+            - if the file is empty after processing
+    """
+
     path = Path(file_path)
 
     if not path.exists():
@@ -121,7 +141,27 @@ def load_targets_from_file(file_path: str) -> list[str]:
 
     return targets
 
-def normalize_target_input(target: str) -> TargetCollection:
+def normalize_target_input(target: str) -> TargetCollection:    
+    """
+    Normalize user-provided target input into a structured TargetCollection.
+
+    The input may be:
+    - a single target (IPv4, IPv6, or domain)
+    - a file path containing multiple targets
+
+    For file inputs:
+    - loads all targets from file
+    - classifies each target
+    - determines if targets are homogeneous or mixed
+
+    Returns:
+        TargetCollection: structured representation of the input
+
+    Raises:
+        TargetError: if input is empty or invalid
+        FileInputError: if file cannot be read or is invalid
+    """
+
     if not target or not target.strip():
         raise TargetError("Target input cannot be empty.")
 

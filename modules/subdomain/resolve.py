@@ -20,7 +20,6 @@ def run(args: argparse.Namespace) -> None:
             ip = entry[4][0]
             output.success(f"{target} -> {ip}")
 
-
 def register(subparsers: argparse._SubParsersAction) -> None:
     parser = subparsers.add_parser(
         "resolve",
