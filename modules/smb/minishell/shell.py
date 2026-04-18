@@ -32,9 +32,9 @@ def cmd_help(state: SessionState, backend: SMBBackend, args: list[str]) -> None:
         print("  ls                 List contents of current path")
         print("  exit / quit        Exit shell")
 
-def cmd_ls(state: SessionState, backend: SMBBackend, args: list[str]) -> None:
-    # Termimar depois
-    print("printo")
+# def cmd_ls(state: SessionState, backend: SMBBackend, args: list[str]) -> None:
+    # NOTE:
+    # Continue later
     
 def cmd_shares(state: SessionState, backend: SMBBackend, args: list[str]) -> None:
     shares = backend.list_shares()
