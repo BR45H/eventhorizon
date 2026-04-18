@@ -15,7 +15,7 @@ def run(args: argparse.Namespace) -> None:
         raise ValidationError("subdomain bruteforce only accepts domain targets")
 
     if target_data.source == "file":
-        output.warning("Running 'subdomain bruteforce' against a target file may produce a large amount of output")
+        output.info("Running 'subdomain bruteforce' against a target file may produce a large amount of output")
 
     for target in target_data.targets:
         output.info(f"Initiating subdomain bruteforce in {target}")

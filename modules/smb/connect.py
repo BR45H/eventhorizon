@@ -1,14 +1,13 @@
+from core.target import normalize_target_input
 from core.validator import validate_smb_connect_args
+from modules.smb.minishell.shell import init_shell
+from core import output
 import argparse
 
 def run(args: argparse.Namespace) -> None:
     validate_smb_connect_args(args)
-    print("[smb:connect]")
-    print(f"target    = {args.target}")
-    print(f"user      = {args.user}")
-    print(f"password  = {args.password}")
-    print(f"anonymous = {args.anonymous}")
-    print(f"verbose   = {args.verbose}")
+    init_shell()
+
 
 def register(subparser: argparse._SubParsersAction) -> None:
     parser = subparser.add_parser(
@@ -36,5 +35,9 @@ def register(subparser: argparse._SubParsersAction) -> None:
     parser.add_argument(
         "-a", "--anonymous",
         help="Use anonymous SMB authentication"
+    )
+    parser.add_argument(
+        "--port",
+        help="Set port to connection (default -> 445)"
     )
     parser.set_defaults(func=run)
