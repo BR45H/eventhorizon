@@ -7,13 +7,13 @@ BIN="/usr/local/bin/eventhorizon"
  
 command -v python3 >/dev/null || { echo "python3 not found."; exit 1; }
  
-[ -d "$VENV" ] || python3 -m venv "$VENV"
+[ -x "$VENV/bin/pip" ] || python3 -m venv "$VENV"
  
 [ -f "$DIR/requirements.txt" ] && "$VENV/bin/pip" install -q -r "$DIR/requirements.txt"
  
 sudo tee "$BIN" > /dev/null << EOF
 #!/usr/bin/env bash
-exec "$VENV/bin/python" "$DIR/cli/main.py" "\$@"
+exec "$VENV/bin/python" "$DIR/main.py" "\$@"
 EOF
 sudo chmod +x "$BIN"
  
