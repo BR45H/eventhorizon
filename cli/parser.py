@@ -1,4 +1,5 @@
 from modules.subdomain import bruteforce as subdomain_bruteforce
+from modules.port import scan as port_scan
 from modules.smb import connect as smb_connect
 from modules.smb import spray as smb_spray
 import argparse
@@ -30,4 +31,12 @@ def build_parser() -> argparse.ArgumentParser:
     smb_connect.register(smb_actions)
     smb_spray.register(smb_actions)
 
+    # ports
+    port_parser = modules.add_parser(
+        "port",
+        help="Port-related operations."
+    )
+    port_actions = port_parser.add_subparsers(dest="action", required=True)
+
+    port_scan.register(port_actions)
     return parser
