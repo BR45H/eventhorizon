@@ -7,9 +7,9 @@ import socket
 
 def run(args: argparse.Namespace) -> None:
     target_data = normalize_target_input(args.target)
-    wordlist_subdomain = [line.strip() for line in Path.open(args.wordlist, mode="r", encoding="utf-8") if line.strip()]
+    wordlist_subdomain = [line.strip() for line in Path(args.wordlist).open(mode="r", encoding="utf-8") if line.strip()]
     verbose_mode = args.verbose
-    show_ipv4 = args.show_ipv4
+    resolve = args.resolve
 
     if target_data.kind != "domain":
         raise ValidationError("subdomain bruteforce only accepts domain targets")
@@ -24,9 +24,9 @@ def run(args: argparse.Namespace) -> None:
         if not result:
             output.warning(f"No subdomains found for {target}")
             continue
-        
+
         for full_domain, ip in result:
-            if show_ipv4:
+            if resolve:
                 output.success(f"{full_domain} -> {ip}")
             else:
                 output.success(f"{full_domain} exist!")
@@ -52,9 +52,9 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         help="Enable verbose output."
     )
     parser.add_argument(
-        "--show-ipv4",
+        "-r", "--resolve",
         action="store_true",
-        help="Show ipv4 from subdomain found."
+        help="Resolve each subdomain found to its IP address."
     )
     parser.set_defaults(func=run)
 
@@ -65,10 +65,10 @@ def subdomain_bruteforce(target, wordlist_subdomain: list[str], verbose: bool = 
         try:
             ip = socket.gethostbyname(full_domain)
             result.append((full_domain, ip))
-        
+
         except socket.gaierror:
             if verbose:
                 output.warning(f"Failed to resolve {full_domain}")
             continue
-        
+
     return result

@@ -1,4 +1,4 @@
-from core.backends.sbm_backend import SMBBackend
+from core.backends.smb_backend import SMBBackend
 from core import output
 
 class SessionState:

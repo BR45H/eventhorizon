@@ -1,5 +1,4 @@
 from modules.subdomain import bruteforce as subdomain_bruteforce
-from modules.subdomain import resolve as subdomain_resolve
 from modules.smb import connect as smb_connect
 from modules.smb import spray as smb_spray
 import argparse
@@ -20,7 +19,6 @@ def build_parser() -> argparse.ArgumentParser:
     subdomain_actions = subdomain_parser.add_subparsers(dest="action", required=True)
 
     subdomain_bruteforce.register(subdomain_actions)
-    subdomain_resolve.register(subdomain_actions)
 
     # smb
     smb_parser = modules.add_parser(

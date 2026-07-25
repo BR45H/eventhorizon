@@ -70,7 +70,7 @@ Examples:
 eventhorizon smb connect -t <target> --anonymous
 eventhorizon smb spray -t <target> -U users.txt -P passwords.txt
 eventhorizon subdomain bruteforce -t example.com -w subdomains.txt
-eventhorizon subdomain resolve -t example.com
+eventhorizon subdomain bruteforce -t example.com -w subdomains.txt -r
 ```
 
 ---

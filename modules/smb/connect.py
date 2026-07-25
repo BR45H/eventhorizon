@@ -2,7 +2,7 @@ from core.exceptions import ValidationError
 from core.target import normalize_target_input
 from core.validator import validate_smb_connect_args
 from modules.smb.minishell.shell import init_shell, SessionState
-from core.backends.sbm_backend import SMBBackend
+from core.backends.smb_backend import SMBBackend
 from core import output
 import argparse
 
@@ -39,6 +39,7 @@ def run(args: argparse.Namespace) -> None:
         password=password,
         anonymous=anonymous,
         port=port,
+        target=target,
     )
 
     if not authenticated:
