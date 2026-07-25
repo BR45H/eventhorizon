@@ -5,7 +5,7 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV="$DIR/.venv"
 BIN="/usr/local/bin/eventhorizon"
  
-command -v python3 >/dev/null || { echo "python3 não encontrado."; exit 1; }
+command -v python3 >/dev/null || { echo "python3 not found."; exit 1; }
  
 [ -d "$VENV" ] || python3 -m venv "$VENV"
  
@@ -17,4 +17,4 @@ exec "$VENV/bin/python" "$DIR/cli/main.py" "\$@"
 EOF
 sudo chmod +x "$BIN"
  
-echo "Instalado. Rode 'eventhorizon --help'."
+echo "Installed. Run 'eventhorizon --help'."
