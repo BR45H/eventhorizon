@@ -21,15 +21,27 @@ def run(args: argparse.Namespace) -> None:
     if args.port == "-":
         ports = list(range(1, 65536))
     elif args.port:
-        ports = [int(p) for p in args.port.split(",")]
+        ports = []
+        for p in args.port.split(","):
+            try:
+                port_num = int(p)
+            except ValueError:
+                output.error(f"Invalid port: '{p}'. Use comma-separated numbers. (ex: 80,443) or '-' for all ports.")
+                return
+
+            if port_num < 0 or port_num > 65535:
+                output.error(f"Port outside the valid range (0-65535): {port_num}")
+                return
+
+            ports.append(port_num)
     else:
         ports = TOP_100_PORTS
 
     for target in target_data.targets:
         output.info(f"Scanning {target}")
         for port in ports:
-            conectou, bann = portscan(target, port, banner)
-            if conectou:
+            connect, bann = portscan(target, port, banner)
+            if connect:
                 if bann:
                     output.success(f"[{port}] ABERTA — {bann}")
                 else:
