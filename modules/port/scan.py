@@ -15,25 +15,25 @@ TOP_100_PORTS = [
     10000, 32768, 49152, 49153, 49154, 49155, 49156, 49157]
 
 def run(args: argparse.Namespace) -> None:
-    target = normalize_target_input(args.target)
+    target_data = normalize_target_input(args.target)
     banner = args.banner
 
     if args.port == "-":
         ports = list(range(1, 65536))
-
-    if args.port:
+    elif args.port:
         ports = [int(p) for p in args.port.split(",")]
-
     else:
         ports = TOP_100_PORTS
 
-    for port in ports:
-        conectou, bann = portscan(target, port, banner)
-        if conectou:
-            if bann:
-                output.success(f"[{port}] ABERTA — {bann}")
-            else:
-                output.success(f"[{port}] ABERTA")
+    for target in target_data.targets:
+        output.info(f"Scanning {target}")
+        for port in ports:
+            conectou, bann = portscan(target, port, banner)
+            if conectou:
+                if bann:
+                    output.success(f"[{port}] ABERTA — {bann}")
+                else:
+                    output.success(f"[{port}] ABERTA")
 
 def register(subparsers: argparse._SubParsersAction) -> None:
     parser = subparsers.add_parser(
@@ -52,8 +52,8 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     )
     parser.add_argument(
         "-b", "--banner",
-        required=False,
-        help="Sets the ports you want to scan.",
+        action="store_true",
+        help="Grab and display service banners from open ports.",
     )
     parser.set_defaults(func=run)
 
@@ -75,7 +75,7 @@ def portscan(target, port: int, banner: bool = False):
 
         mysocket.close()
 
-    except Exception as e:
+    except OSError:
         connect = False
 
     return connect, bann
