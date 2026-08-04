@@ -1,5 +1,4 @@
 from core.target import normalize_target_input
-from core.exceptions import ValidationError
 from core import output
 import argparse
 import socket
@@ -43,9 +42,9 @@ def run(args: argparse.Namespace) -> None:
             connect, bann = portscan(target, port, banner)
             if connect:
                 if bann:
-                    output.success(f"[{port}] ABERTA — {bann}")
+                    output.success(f"[{port}] OPEN — {bann}")
                 else:
-                    output.success(f"[{port}] ABERTA")
+                    output.success(f"[{port}] OPEN")
 
 def register(subparsers: argparse._SubParsersAction) -> None:
     parser = subparsers.add_parser(

@@ -1,7 +1,7 @@
 from modules.subdomain import bruteforce as subdomain_bruteforce
+from modules.subdomain import takeover as subdomain_takeover
 from modules.port import scan as port_scan
-from modules.smb import connect as smb_connect
-from modules.smb import spray as smb_spray
+from modules.port import peek as port_peek
 import argparse
 
 def build_parser() -> argparse.ArgumentParser:
@@ -20,16 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
     subdomain_actions = subdomain_parser.add_subparsers(dest="action", required=True)
 
     subdomain_bruteforce.register(subdomain_actions)
-
-    # smb
-    smb_parser = modules.add_parser(
-        "smb",
-        help="SMB-related operations."
-    )
-    smb_actions = smb_parser.add_subparsers(dest="action", required=True)
-
-    smb_connect.register(smb_actions)
-    smb_spray.register(smb_actions)
+    subdomain_takeover.register(subdomain_actions)
 
     # ports
     port_parser = modules.add_parser(
@@ -39,4 +30,5 @@ def build_parser() -> argparse.ArgumentParser:
     port_actions = port_parser.add_subparsers(dest="action", required=True)
 
     port_scan.register(port_actions)
+    port_peek.register(port_actions)
     return parser

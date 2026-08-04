@@ -2,8 +2,7 @@ from core.exceptions import FileInputError, TargetError
 from dataclasses import dataclass
 from pathlib import Path
 import re
-
-HEX_CHARS = set("0123456789ABCDEF")
+import ipaddress
 
 DOMAIN_REGEX = re.compile(
     r"^(?=.{1,253}$)(?!-)([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$"
@@ -16,111 +15,26 @@ class TargetCollection:
     targets: list[str]
 
 def is_ipv4(target: str) -> bool:
-    """Validate IPv4 addresses using strict manual parsing.
-
-    Enforces:
-    - exactly 4 octets
-    - numeric range (0–255)
-    - no leading zeros in octets
-
-    Designed for controlled input and predictable behavior.
-    """
-    # NOTE:
-    # Strict IPv4 validation:
-    # - rejects leading zeros in octets
-    # - intended for controlled input and predictable parsing
-    
-    parts = target.split(".")
-
-    if len(parts) != 4:
-        return False
-
     try:
-        for part in parts:
-            if not part:
-                return False
-
-            if len(part) > 1 and part.startswith("0"):
-                return False
-
-            num = int(part)
-            if not (0 <= num <= 255):
-                return False
-
+        ip = ipaddress.ip_address(target)
+        if ip == 4:
+            return True
+        else:
+            return False
+        
     except ValueError:
         return False
 
-    return True
-
 def is_ipv6(target: str) -> bool:
-    """Validate IPv6 addresses using manual parsing.
-
-    Supports:
-    - Standard IPv6 notation (8 hexadecimal groups)
-    - Compressed IPv6 notation using '::'
-    - IPv6 addresses with an IPv4 dotted-decimal suffix
-
-    Validation includes:
-    - Group count checks for compressed and non-compressed forms
-    - Hexadecimal character validation
-    - Maximum group length of 4 hexadecimal characters
-    - Basic IPv4 suffix detection
-
-    This implementation is intended for common IPv6 formats and controlled input.
-    It is not a fully RFC-compliant IPv6 validator and does not cover all edge cases.
-    """
-    # NOTE:
-    # Manual IPv6 parsing for learning and controlled validation.
-    # Supports common compressed forms and IPv4 suffixes, but is not a full RFC implementation.
-    
-    if not target:
-        return False
-    if target.count("::") > 1:
-        return False
-    
-    if "::" in target:
-        left, right = target.split("::")
-
-        left_parts = left.split(":") if left else []
-        right_parts = right.split(":") if right else []
-        limit = 8
-
-        if right_parts and is_ipv4(right_parts[-1]):
-            right_parts = right_parts[0:-1]
-            limit = 7
-
-        parts = left_parts + right_parts
-
-        if len(parts) >= limit:
+    try:
+        ip = ipaddress.ip_address(target)
+        if ip == 6:
+            return True
+        else:
             return False
-
-    else:
-        parts = target.split(":")
-        count = len(parts)
-
-        if count < 7 or count > 8:
-            return False
-
-        ipv4 = is_ipv4(parts[-1])
-
-        if count == 7 and not ipv4:
-            return False
-
-        if count == 7 and ipv4:
-            parts = parts[0:-1]
         
-    for part in parts:
-        if not part:
-            return False
-
-        if len(part) > 4:
-            return False
-
-        for char in part:
-            if char.upper() not in HEX_CHARS:
-                return False
-
-    return True
+    except ValueError:
+        return False
 
 def is_file_target(target: str) -> bool:
     return Path(target).is_file()
