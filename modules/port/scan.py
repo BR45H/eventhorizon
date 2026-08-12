@@ -1,3 +1,4 @@
+from .scan_lib.funcs_scan import *
 from core.target import normalize_target_input
 from core import output
 import argparse
@@ -13,38 +14,34 @@ TOP_100_PORTS = [
     6001, 6646, 7070, 8000, 8008, 8009, 8080, 8081, 8443, 8888, 9100, 9999,
     10000, 32768, 49152, 49153, 49154, 49155, 49156, 49157]
 
+STATUS_OUTPUT = {
+    "open": output.success,
+    "closed": output.error,
+    "filtered": output.warning,
+    "unknown": output.info,
+}
+
 def run(args: argparse.Namespace) -> None:
     target_data = normalize_target_input(args.target)
-    banner = args.banner
-
-    if args.port == "-":
-        ports = list(range(1, 65536))
-    elif args.port:
-        ports = []
-        for p in args.port.split(","):
-            try:
-                port_num = int(p)
-            except ValueError:
-                output.error(f"Invalid port: '{p}'. Use comma-separated numbers. (ex: 80,443) or '-' for all ports.")
-                return
-
-            if port_num < 0 or port_num > 65535:
-                output.error(f"Port outside the valid range (0-65535): {port_num}")
-                return
-
-            ports.append(port_num)
-    else:
-        ports = TOP_100_PORTS
+    ports = parse_ports(args.port)
+    verbose = args.verbose
+    ttl = args.ttl
+    srcp = args.srcp
 
     for target in target_data.targets:
-        output.info(f"Scanning {target}")
+        ip = normalize_target(target)
+
+        if ip is None:
+            continue
+        if ports is None:
+            return
+
         for port in ports:
-            connect, bann = portscan(target, port, banner)
-            if connect:
-                if bann:
-                    output.success(f"[{port}] OPEN — {bann}")
-                else:
-                    output.success(f"[{port}] OPEN")
+            resp = csr_TCP(target, ttl, srcp, port)
+            status = interpreting_response_TCP(resp)
+
+            if status == "open" or verbose:
+                STATUS_OUTPUT[status](f"{port}/tcp\t{status}")
 
 def register(subparsers: argparse._SubParsersAction) -> None:
     parser = subparsers.add_parser(
@@ -59,34 +56,26 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     parser.add_argument(
         "-p", "--port",
         required=False,
+        default=",".join(str(p) for p in TOP_100_PORTS),
         help="Sets the ports you want to scan.",
     )
     parser.add_argument(
-        "-b", "--banner",
+        "-v", "--verbose",
         action="store_true",
-        help="Grab and display service banners from open ports.",
+        help="Show all ports scanned.",
+    )
+    parser.add_argument(
+        "--ttl",
+        default=255,
+        type=int,
+        help="Set a TTL for the packet.",
+    )
+    parser.add_argument(
+        "-srcp", "--source-port",
+        dest="srcp",
+        default=53,
+        type=int,
+        help="Set a source port.",
     )
     parser.set_defaults(func=run)
-
-def portscan(target, port: int, banner: bool = False):
-    connect = False
-    bann = None
-
-    try:
-        mysocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        mysocket.settimeout(1)
-        result = mysocket.connect_ex((target, port))
-        connect = (result == 0)
-
-        if connect and banner:
-            try:
-                bann = mysocket.recv(1024).decode(errors="ignore").strip()
-            except socket.timeout:
-                bann = None
-
-        mysocket.close()
-
-    except OSError:
-        connect = False
-
-    return connect, bann
+    
