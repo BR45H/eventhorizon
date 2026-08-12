@@ -27,11 +27,12 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     parser.add_argument(
         "-p", "--port",
         required=True,
+        type=int,
         help="Sets the ports you want to peek.",
     )
     parser.set_defaults(func=run)
 
-def portpeek(target, port: int) -> bool:
+def portpeek(target, port) -> bool:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     resp = sock.connect_ex((target, port))
 
