@@ -17,22 +17,14 @@ class TargetCollection:
 def is_ipv4(target: str) -> bool:
     try:
         ip = ipaddress.ip_address(target)
-        if ip == 4:
-            return True
-        else:
-            return False
-        
+        return ip.version == 4
     except ValueError:
         return False
 
 def is_ipv6(target: str) -> bool:
     try:
         ip = ipaddress.ip_address(target)
-        if ip == 6:
-            return True
-        else:
-            return False
-        
+        return ip.version == 6
     except ValueError:
         return False
 

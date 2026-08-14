@@ -9,7 +9,7 @@ def run(args: argparse.Namespace) -> None:
 
     for target in target_data.targets:
         resp = portpeek(target, port)
-        if resp == 0:
+        if resp is True:
             output.success(f"PORT: {port} is open.")
         else:
             output.info(f"PORT {port} is closed.")
@@ -28,7 +28,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "-p", "--port",
         required=True,
         type=int,
-        help="Sets the ports you want to peek.",
+        help="Set the port you want to peek.",
     )
     parser.set_defaults(func=run)
 
