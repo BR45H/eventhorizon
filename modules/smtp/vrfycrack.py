@@ -16,6 +16,10 @@ def run(args: argparse.Namespace) -> None:
     for target in target_data.targets:
         result = vrfycrack(target, port, wordlist_users, verbose, banner)
 
+        if users is None:
+            output.error(f"Could not reach {target}, skipping.")
+            continue
+
         users = result
         print(f"===== VALID USERS ({target}) =====\n")
 
@@ -69,7 +73,7 @@ def vrfycrack(target: str, port: int, wordlist_users: list[str], verbose: bool, 
     except socket.gaierror as e:
         if verbose:
             output.error(f"Fail to resolve {target}: {e}")
-        return valid_users
+        return None
         
     if not results:
         return None
@@ -84,7 +88,6 @@ def vrfycrack(target: str, port: int, wordlist_users: list[str], verbose: bool, 
             if resp != 0:
                 if verbose:
                     output.error(f"Fail to connect in {target}:{port}")
-                exit(1)
                 return None
 
             server_banner = sock.recv(1024)
