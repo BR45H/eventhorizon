@@ -1,5 +1,6 @@
 from core.target import normalize_target_input
 from core import output
+from sys import exit
 from pathlib import Path
 import argparse
 import socket
@@ -71,7 +72,7 @@ def vrfycrack(target: str, port: int, wordlist_users: list[str], verbose: bool, 
         return valid_users
         
     if not results:
-        return valid_users
+        return None
     
     family, type_, proto, canonname, sockaddr = results[0]
 
@@ -82,8 +83,9 @@ def vrfycrack(target: str, port: int, wordlist_users: list[str], verbose: bool, 
 
             if resp != 0:
                 if verbose:
-                    output.error(f"Fail to connect in {target}")
-                return valid_users
+                    output.error(f"Fail to connect in {target}:{port}")
+                    exit(1)
+                return None
 
             server_banner = sock.recv(1024)
             if banner:
@@ -108,5 +110,5 @@ def vrfycrack(target: str, port: int, wordlist_users: list[str], verbose: bool, 
     except OSError as e:
         if verbose:
             output.error(f"Socket error on {target}: {e}")
-        return valid_users
+        return None
     
