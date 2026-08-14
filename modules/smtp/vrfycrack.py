@@ -68,10 +68,10 @@ def vrfycrack(target: str, port: int, wordlist_users: list[str], verbose: bool, 
     except socket.gaierror as e:
         if verbose:
             output.error(f"Fail to resolve {target}: {e}")
-        return None
+        return valid_users
         
     if not results:
-        return None
+        return valid_users
     
     family, type_, proto, canonname, sockaddr = results[0]
 
@@ -83,7 +83,7 @@ def vrfycrack(target: str, port: int, wordlist_users: list[str], verbose: bool, 
             if resp != 0:
                 if verbose:
                     output.error(f"Fail to connect in {target}")
-                return None
+                return valid_users
 
             server_banner = sock.recv(1024)
             if banner:
@@ -108,5 +108,5 @@ def vrfycrack(target: str, port: int, wordlist_users: list[str], verbose: bool, 
     except OSError as e:
         if verbose:
             output.error(f"Socket error on {target}: {e}")
-        return None
+        return valid_users
     
