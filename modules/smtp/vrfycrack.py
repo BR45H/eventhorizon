@@ -16,11 +16,11 @@ def run(args: argparse.Namespace) -> None:
     for target in target_data.targets:
         result = vrfycrack(target, port, wordlist_users, verbose, banner)
 
+        users = result
         if users is None:
             output.error(f"Could not reach {target}, skipping.")
             continue
 
-        users = result
         print(f"===== VALID USERS ({target}) =====\n")
 
         if not users:
