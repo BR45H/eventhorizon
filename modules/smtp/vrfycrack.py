@@ -84,7 +84,7 @@ def vrfycrack(target: str, port: int, wordlist_users: list[str], verbose: bool, 
             if resp != 0:
                 if verbose:
                     output.error(f"Fail to connect in {target}:{port}")
-                    exit(1)
+                exit(1)
                 return None
 
             server_banner = sock.recv(1024)
