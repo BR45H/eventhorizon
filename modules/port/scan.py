@@ -46,7 +46,7 @@ def run(args: argparse.Namespace) -> None:
 def register(subparsers: argparse._SubParsersAction) -> None:
     parser = subparsers.add_parser(
         "scan",
-        help="Perform controlled portscan."
+        help="Perform a controlled SYN portscan."
     )
     parser.add_argument(
         "-t", "--target",
