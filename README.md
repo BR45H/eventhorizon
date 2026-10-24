@@ -29,30 +29,28 @@ It is intended to act as a dependable “Swiss Army knife” for network-related
 
 * Modular architecture (`module -> action`)
 * Clear and explicit command structure
-* Fine-grained control over execution (timeouts, retries, rate)
+* Fine-grained control over execution (timeouts, send mode, rate)
 * Consistent and predictable output
 * Extensibility for future protocols and features
 
 ---
 
-## Planned Features
+## Modules & Actions
 
-### Subdomain
+### tcp
 
-* Bruteforce-based subdomain discovery
-* DNS resolution
+* `synscan` — controlled SYN scan (via Scapy), with custom TTL and source port. Requires an explicit send mode (`sequential` or `batch`).
+* `connectscan` — controlled TCP connect scan (full three-way handshake), with custom timeout. Requires an explicit send mode (`sequential` or `batch`).
+* `portpeek` — one-off check on a single port.
 
-### SMB
+### subdomain
 
-* Controlled connection handling
-* Authentication attempts (user/password)
-* Password spraying (rate-controlled)
+* `bruteforce` — wordlist-based subdomain discovery, with optional DNS resolution and multithreaded lookups.
+* `takeover` — subdomain takeover detection (CNAME resolution + service fingerprint database).
 
-### Core
+### smtp
 
-* Target normalization (domain, IP, file input)
-* Configurable execution parameters
-* Logging and verbosity control
+* `vrfycrack` — SMTP user enumeration via the `VRFY` command, with optional banner grabbing.
 
 ---
 
@@ -67,10 +65,16 @@ eventhorizon <module> <action> [options]
 Examples:
 
 ```
-eventhorizon smb connect -t <target> --anonymous
-eventhorizon smb spray -t <target> -U users.txt -P passwords.txt
+eventhorizon tcp synscan -t example.com -m sequential
+eventhorizon tcp synscan -t example.com -p 22,80,443 -m batch -v
+eventhorizon tcp connectscan -t 192.168.1.1 -m batch --timeout 1.5
+eventhorizon tcp portpeek -t example.com -p 443
+
 eventhorizon subdomain bruteforce -t example.com -w subdomains.txt
-eventhorizon subdomain bruteforce -t example.com -w subdomains.txt -r
+eventhorizon subdomain bruteforce -t example.com -w subdomains.txt -r --threads 20
+eventhorizon subdomain takeover -t example.com -w subdomains.txt -v
+
+eventhorizon smtp vrfycrack -t mail.example.com -w users.txt -b -v
 ```
 
 ---
@@ -84,15 +88,15 @@ Instead, it focuses on:
 * Controlled request pacing
 * Minimal unnecessary noise
 * Operator-defined behavior
-* Safe defaults with optional tuning
+* Safe defaults with optional tuning — every port scan requires an explicit `--mode` (`sequential` or `batch`) instead of picking one silently
 
 ---
 
 ## Status
 
-This project is currently in early development.
+🚧 This project is under active early-stage development.
 
-Core architecture and CLI structure are being defined before full implementation.
+Implemented so far: TCP port scanning (SYN and connect-based, sequential and batch modes), subdomain bruteforce and takeover detection, SMTP user enumeration via VRFY.
 
 ---
 
