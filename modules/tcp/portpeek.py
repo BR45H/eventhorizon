@@ -38,8 +38,9 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         default=2.0,
         help="Set the timeout.",
     )
+    parser.set_defaults(func=run)
 
-def portpeek(target: str, port: int, timeout: float = 2.0) -> bool:
+def portpeek(target: str, port: int, timeout: float) -> bool:
     try:
         results = socket.getaddrinfo(target, port, socket.AF_UNSPEC, socket.SOCK_STREAM)
     except socket.gaierror:

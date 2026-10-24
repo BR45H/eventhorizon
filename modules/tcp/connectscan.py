@@ -55,7 +55,7 @@ def run(args: argparse.Namespace) -> None:
 def register(subparsers: argparse._SubParsersAction) -> None:
     parser = subparsers.add_parser(
         "connectscan",
-        help="Perform a controlled SYN portscan."
+        help="Perform a controlled TCP connect scan."
     )
     parser.add_argument(
         "-t", "--target",
@@ -76,6 +76,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     parser.add_argument(
         "-m", "--mode",
         required=True,
+        choices=["sequential", "batch"],
         help="Set a sending sequence (Batch or Sequential)"
     )
     parser.add_argument(
@@ -85,7 +86,3 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         default=2.0,
     )
     parser.set_defaults(func=run)
-
-def chunkify(list, size):
-    for i in range(0, len(list), size):
-        yield list[i:i + size]

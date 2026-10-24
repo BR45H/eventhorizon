@@ -97,10 +97,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     parser.add_argument(
         "-m", "--mode",
         required=True,
+        choices=["sequential", "batch"],
         help="Set a sending sequence (Batch or Sequential)"
     )
     parser.set_defaults(func=run)
-
-def chunkify(list, size):
-    for i in range(0, len(list), size):
-        yield list[i:i + size]

@@ -128,3 +128,7 @@ def connect_scan_nonblocking(ip: str, ports: list[int], timeout: float = 2.0) ->
             sock.close()
 
     return result
+
+def chunkify(list, size):
+    for i in range(0, len(list), size):
+        yield list[i:i + size]
