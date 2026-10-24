@@ -2,7 +2,6 @@ from .scan_lib.funcs_scan import *
 from core.target import normalize_target_input
 from core import output
 import argparse
-import socket
 
 TOP_100_PORTS = [
     7, 9, 13, 21, 22, 23, 25, 26, 37, 53, 79, 80, 81, 88, 106, 110, 111, 113,
@@ -25,8 +24,8 @@ def run(args: argparse.Namespace) -> None:
     target_data = normalize_target_input(args.target)
     ports = parse_ports(args.port)
     verbose = args.verbose
-    ttl = args.ttl
-    srcp = args.srcp
+    timeout = args.timeout
+    mode = args.mode
 
     for target in target_data.targets:
         ip = normalize_target(target)
@@ -36,16 +35,26 @@ def run(args: argparse.Namespace) -> None:
         if ports is None:
             return
 
-        for port in ports:
-            resp = csr_TCP(target, ttl, srcp, port)
-            status = interpreting_response_TCP(resp)
+        if mode == "sequential":
+            for port in ports:
+                status = connect_scan_sequential(ip, port, timeout)
 
-            if status == "open" or verbose:
-                STATUS_OUTPUT[status](f"{port}/tcp\t{status}")
+                if status == "open" or verbose:
+                    STATUS_OUTPUT[status](f"{port}/tcp\t{status}")
+
+        elif mode == "batch":
+            for chunk in chunkify(ports, 500):
+                dict = connect_scan_nonblocking(ip, chunk, timeout)
+                for port_returned, status in dict.items():
+                    if status == "open" or verbose:
+                        STATUS_OUTPUT[status](f"{port_returned}/tcp\t{status}")
+
+        else:
+            output.warning("Inexistent mode.")
 
 def register(subparsers: argparse._SubParsersAction) -> None:
     parser = subparsers.add_parser(
-        "scan",
+        "connectscan",
         help="Perform a controlled SYN portscan."
     )
     parser.add_argument(
@@ -65,17 +74,18 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         help="Show all ports scanned.",
     )
     parser.add_argument(
-        "--ttl",
-        default=255,
-        type=int,
-        help="Set a TTL for the packet.",
+        "-m", "--mode",
+        required=True,
+        help="Set a sending sequence (Batch or Sequential)"
     )
     parser.add_argument(
-        "-srcp", "--source-port",
-        dest="srcp",
-        default=53,
-        type=int,
-        help="Set a source port.",
+        "--timeout",
+        help="Set a timeout",
+        type=float,
+        default=2.0,
     )
     parser.set_defaults(func=run)
-    
+
+def chunkify(list, size):
+    for i in range(0, len(list), size):
+        yield list[i:i + size]

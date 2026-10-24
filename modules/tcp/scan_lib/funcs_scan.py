@@ -1,7 +1,8 @@
 import ipaddress
 import re
 import socket
-from scapy.all import IP, TCP, ICMP, sr1
+import selectors
+from scapy.all import IP, TCP, ICMP, sr1, sr
 from core.output import error
 
 DOMAIN_REGEX = r'^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63}(?<!-))+$'
@@ -50,7 +51,7 @@ def normalize_target(target: str):
 
     if re.match(DOMAIN_REGEX, target):
         try:
-            result = socket.getaddrinfo(target, None, socket.AF_UNSPEC)
+            result = socket.getaddrinfo(target, None, socket.AF_INET)
             ip_resolved = result[0][4][0]
             return str(ip_resolved)
         except socket.gaierror as e:
@@ -77,7 +78,53 @@ def interpreting_response_TCP(resp) -> str:
     else:
         return "unknown"
 
-def csr_TCP(target: str, ttl: int, src: int, port: int):
+def csr_TCP(target: str, ttl: int, src: int, ports: list[int]):
+    pkt = [IP(dst=target, ttl=ttl) / TCP(sport=src, dport=port, flags="S") for port in ports]
+    resp, no_resp = sr(pkt, timeout=1, verbose=0)
+    return resp, no_resp
+
+def csr1_TCP(target: str, ttl: int, src: int, port: int):
     pkt = IP(dst=target, ttl=ttl) / TCP(sport=src, dport=port, flags="S")
     resp = sr1(pkt, timeout=1, verbose=0)
     return resp
+
+def connect_scan_sequential(ip: str, port: int, timeout: float = 2.0) -> str:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(timeout)
+    try:
+        result = sock.connect_ex((ip, port))
+        return "open" if result == 0 else "closed"
+    finally:
+        sock.close()
+
+def connect_scan_nonblocking(ip: str, ports: list[int], timeout: float = 2.0) -> dict:
+    sel = selectors.DefaultSelector()
+    result = {}
+
+    for port in ports:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setblocking(False)
+
+        try:
+            sock.connect((ip, port))
+        except BlockingIOError:
+            pass
+        sel.register(sock, selectors.EVENT_WRITE, data=port)
+
+    while sel.get_map():
+        events = sel.select(timeout=timeout)
+        if not events:
+            for key in list(sel.get_map().values()):
+                sel.unregister(key.fileobj)
+                key.fileobj.close()
+            break
+
+        for key, _ in events:
+            sock = key.fileobj
+            port = key.data
+            erro = sock.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR)
+            result[port] = "open" if erro == 0 else "closed"
+            sel.unregister(sock)
+            sock.close()
+
+    return result

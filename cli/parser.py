@@ -1,7 +1,8 @@
 from modules.subdomain import bruteforce as subdomain_bruteforce
 from modules.subdomain import takeover as subdomain_takeover
-from modules.port import scan as port_scan
-from modules.port import peek as port_peek
+from modules.tcp import synscan as tcp_synscan
+from modules.tcp import connectscan as tcp_connectscan
+from modules.tcp import portpeek as tcp_portpeek
 from modules.smtp import vrfycrack as smtp_vrfycrack
 import argparse
 
@@ -23,15 +24,16 @@ def build_parser() -> argparse.ArgumentParser:
     subdomain_bruteforce.register(subdomain_actions)
     subdomain_takeover.register(subdomain_actions)
 
-    # ports
-    port_parser = modules.add_parser(
-        "port",
-        help="Port-related operations."
+    #TCP
+    tcp_parser = modules.add_parser(
+        "tcp",
+        help="TCP-related operations."
     )
-    port_actions = port_parser.add_subparsers(dest="action", required=True)
+    tcp_actions = tcp_parser.add_subparsers(dest="action", required=True)
 
-    port_scan.register(port_actions)
-    port_peek.register(port_actions)
+    tcp_connectscan.register(tcp_actions)
+    tcp_synscan.register(tcp_actions)
+    tcp_portpeek.register(tcp_actions)
 
     # smtp
     smtp_parser = modules.add_parser(

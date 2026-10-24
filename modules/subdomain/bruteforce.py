@@ -2,7 +2,7 @@ from core.target import normalize_target_input
 from core.exceptions import ValidationError
 from core import output
 from pathlib import Path
-import argparse
+import argparse, threading
 import socket
 
 def run(args: argparse.Namespace) -> None:
@@ -10,6 +10,7 @@ def run(args: argparse.Namespace) -> None:
     wordlist_subdomain = [line.strip() for line in Path(args.wordlist).open(mode="r", encoding="utf-8") if line.strip()]
     verbose_mode = args.verbose
     resolve = args.resolve
+    threads = args.threads
 
     if target_data.kind != "domain":
         raise ValidationError("subdomain bruteforce only accepts domain targets")
@@ -19,7 +20,7 @@ def run(args: argparse.Namespace) -> None:
 
     for target in target_data.targets:
         output.info(f"Initiating subdomain bruteforce in {target}")
-        result = subdomain_bruteforce(target, wordlist_subdomain, verbose_mode)
+        result = subdomain_bruteforce(target, wordlist_subdomain, verbose_mode, threads)
 
         if not result:
             output.warning(f"No subdomains found for {target}")
@@ -56,19 +57,37 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         action="store_true",
         help="Resolve each subdomain found to its IP address."
     )
+    parser.add_argument(
+        "--threads",
+        type=int,
+        default=10,
+        help="Number of concurrent threads (default: 10)"
+    )
     parser.set_defaults(func=run)
 
-def subdomain_bruteforce(target, wordlist_subdomain: list[str], verbose: bool = False) -> list[tuple[str, str]]:
-    result = []
-    for subdomain in wordlist_subdomain:
-        full_domain = f"{subdomain}.{target}"
+def resolver(full_domain, result, lock, verbose, semaphore):
+    with semaphore:
         try:
             ip = socket.gethostbyname(full_domain)
-            result.append((full_domain, ip))
-
+            with lock:
+                result.append((full_domain, ip))
         except socket.gaierror:
             if verbose:
                 output.warning(f"Failed to resolve {full_domain}")
-            continue
+
+def subdomain_bruteforce(target, wordlist_subdomain: list[str], verbose: bool = False, threads: int = 10) -> list[tuple[str, str]]:
+    result = []
+    lock = threading.Lock()
+    semaphore = threading.Semaphore(threads)
+    threads_list = []
+
+    for subdomain in wordlist_subdomain:
+        full_domain = f"{subdomain}.{target}"
+        t = threading.Thread(target=resolver, args=(full_domain, result, lock, verbose, semaphore))
+        threads_list.append(t)
+        t.start()
+
+    for t in threads_list:
+        t.join()
 
     return result
